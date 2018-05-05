@@ -7,42 +7,43 @@ var watchify = require("watchify");
 var gutil = require("gulp-util");
 
 var paths = {
-    pages: [
-        'src/*.html',
-        'src/*.css',
+    simple_test: [
+        'test/simple_html.html'
+    ],
+    ion_css: [
         'node_modules/ion-rangeslider/css/*.css'
     ],
-    images: [
+    ion_images: [
         'node_modules/ion-rangeslider/img/*.png'
     ]
 };
 
-gulp.task("copy-html", function () {
-    return gulp.src(paths.pages)
-        .pipe(gulp.dest("dist"));
+gulp.task("copy-html-test", function () {
+    return gulp.src(paths.simple_test.concat(paths.ion_css))
+        .pipe(gulp.dest('test/build/site/'));
 });
 
-gulp.task("copy-img", function () {
-    return gulp.src(paths.images)
-        .pipe(gulp.dest("img"));
+gulp.task("copy-img-test", function () {
+    return gulp.src(paths.ion_images)
+        .pipe(gulp.dest("test/build/img"));
 });
 
 var b = function() {
     return browserify({
         basedir: '.',
         debug: true,
-        entries: ['src/main.ts'],
+        entries: ['test/simple_html.ts'],
         cache: {},
         packageCache: {}
     })
     .plugin(tsify)
 }
 
-function bundle() {
+function testBundle() {
     b()
     .bundle()
     .pipe(source('bundle.js'))
-    .pipe(gulp.dest("dist"));
+    .pipe(gulp.dest("test/build/site"));
 }
 
 var w = watchify(b())
@@ -52,6 +53,7 @@ gulp.task('watch', function() {
   w.on('update', bundle.bind(null, w));
 });
 
-gulp.task("default", ["copy-html", "copy-img"], bundle)
-gulp.task('build', bundle.bind(null, b()));
-w.on("update", bundle)
+
+gulp.task("simple-test", ["copy-html-test", "copy-img-test"], testBundle)
+//gulp.task('build', bundle.bind(null, b()));
+//w.on("update", bundle)
