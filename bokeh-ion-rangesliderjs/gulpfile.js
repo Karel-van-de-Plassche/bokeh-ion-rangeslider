@@ -5,6 +5,7 @@ var tsify = require("tsify");
 
 var watchify = require("watchify");
 var gutil = require("gulp-util");
+var clean = require('gulp-clean');
 
 var paths = {
     simple_test: [
@@ -18,8 +19,8 @@ var paths = {
     ]
 };
 
-gulp.task("copy-html-test", function () {
-    return gulp.src(paths.simple_test.concat(paths.ion_css))
+gulp.task("copy-css-test", function () {
+    return gulp.src(paths.ion_css)
         .pipe(gulp.dest('test/build/site/'));
 });
 
@@ -28,7 +29,12 @@ gulp.task("copy-img-test", function () {
         .pipe(gulp.dest("test/build/img"));
 });
 
-var b = function() {
+gulp.task("clean-test", function () {
+    return gulp.src('test/build', {read: false, allowEmpty: true})
+        .pipe(clean());
+});
+
+var simpleTest = function() {
     return browserify({
         basedir: '.',
         debug: true,
@@ -39,21 +45,43 @@ var b = function() {
     .plugin(tsify)
 }
 
-function testBundle() {
-    b()
+function simpleTestBundle() {
+    return simpleTest()
     .bundle()
     .pipe(source('bundle.js'))
     .pipe(gulp.dest("test/build/site"));
 }
 
-var w = watchify(b())
-
-gulp.task('watch', function() {
-  bundle(w);
-  w.on('update', bundle.bind(null, w));
+gulp.task("copy-html-simple-test", function () {
+    return gulp.src('test/simple_html.html')
+        .pipe(gulp.dest('test/build/site/'));
 });
 
+gulp.task("simple-test", gulp.series("clean-test", ["copy-html-simple-test", "copy-css-test", "copy-img-test"], simpleTestBundle))
 
-gulp.task("simple-test", ["copy-html-test", "copy-img-test"], testBundle)
+var bokehTest = function() {
+    return browserify({
+        basedir: '.',
+        debug: true,
+        entries: ['test/bokeh_test.ts'],
+        cache: {},
+        packageCache: {}
+    })
+    .plugin(tsify)
+}
+
+function bokehTestBundle() {
+    return bokehTest()
+    .bundle()
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest("test/build/site"));
+}
+
+gulp.task("copy-html-bokeh-test", function () {
+    return gulp.src('test/bokeh_test.html')
+        .pipe(gulp.dest('test/build/site/'));
+});
+
+gulp.task("bokeh-test", gulp.series("clean-test", ["copy-html-bokeh-test", "copy-css-test", "copy-img-test"], bokehTestBundle))
 //gulp.task('build', bundle.bind(null, b()));
 //w.on("update", bundle)
