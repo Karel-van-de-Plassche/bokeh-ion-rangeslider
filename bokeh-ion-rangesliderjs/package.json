@@ -1,0 +1,43 @@
+{
+  "bundleDependencies": false,
+  "contributors": [
+    {
+      "name": "Karel van de Plassche",
+      "url": "https://github.com/Karel-van-de-Plassche/"
+    }
+  ],
+  "engines": {
+    "node": ">=8.8 <9.0",
+    "npm": ">=6.0 <7.0"
+  },
+  "devDependencies": {
+    "browserify": "^16.2.0",
+    "gulp": "^3.9.0",
+    "gulp-clean": "^0.4.0",
+    "gulp-typescript": "^3.2.3",
+    "gulp-util": "^3.0.4",
+    "ts-node": "^3.1.0",
+    "tsify": "^4.0.0",
+    "typescript": "2.8.1",
+    "vinyl-source-stream": "^2.0.0",
+    "watchify": "^3.11.0"
+  },
+  "dependencies": {
+    "@types/jquery": "^3.3.1",
+    "bokehjs": "^0.12.15",
+    "ion-rangeslider": "^2.2.0",
+    "jquery": "^3.3.1"
+  },
+  "deprecated": false,
+  "description": "Bokeh interface for Ion.RangeSlider",
+  "license": "MIT",
+  "main": "",
+  "name": "bokeh-ion-rangeslider",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Karel-van-de-Plassche/bokeh-ion-rangeslider"
+  },
+  "scripts": {},
+  "typeScriptVersion": "2.8.3",
+  "version": "0.0.1"
+}
