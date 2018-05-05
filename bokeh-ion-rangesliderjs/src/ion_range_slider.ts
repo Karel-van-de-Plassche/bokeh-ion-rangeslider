@@ -6,7 +6,7 @@ import {throttle} from "core/util/callback"
 import {Color} from "core/types"
 // The "core/properties" module has all the property types
 import * as p from "core/properties"
-import {div, input} from "core/dom"
+import {div, input, label} from "core/dom"
 import {logger} from "core/logging"
 import {Orientation, SliderCallbackPolicy} from "core/enums"
 import {repeat} from "core/util/array"
@@ -29,12 +29,14 @@ export class IonRangeSliderView extends AbstractSliderView {
     return {
       start: this.model.start,
       end: this.model.end,
-      value: [this.model.value],
+      value: this.model.value,
       step: this.model.step,
     }
   }
 
   protected _calc_from(values: number[]): number[] {
+    if (!(values instanceof Array))
+      values = [values, values]
     return values
   }
 
@@ -66,6 +68,7 @@ export class IonRangeSliderView extends AbstractSliderView {
 
     logger.info(`[ionRangeSlider] Setting callback`)
     if (this.model.callback != null) {
+      logger.info('[ionRangeSlider] Callback non-zero')
       const callback = () => this.model.callback.execute(this.model)
 
       switch (this.model.callback_policy) {
@@ -101,8 +104,8 @@ export class IonRangeSliderView extends AbstractSliderView {
     console.log(this.model.values)
     console.log(this.model.values instanceof Array)
     if (this.sliderEl == null) {
-      //this.sliderEl = input({type: "text", class: "slider", id: this.model.id})
-      this.sliderEl = input({type: "text", class: "slider", id: 'blerger'})
+      this.sliderEl = input({type: "text", class: "slider", id: this.model.id})
+      //this.sliderEl = input({type: "text", class: "slider", id: 'blerger'})
       this.el.appendChild(this.sliderEl) // XXX: bad typings; no cssPrefix
 
 
@@ -110,14 +113,14 @@ export class IonRangeSliderView extends AbstractSliderView {
       var opts: IonRangeSliderOptions = {
         type: this.model.slider_type,
         cssPrefix: prefix,
-        disable: false
       }
       if (this.model.values instanceof Array) {
         opts.values = this.model.values
       } else {
-        opts.min = start
-        opts.max = end
-        opts.start = value
+        opts.min  = start
+        opts.max  = end
+        opts.from = value[0]
+        opts.to   = value[1]
         opts.step = step
       }
       opts.grid = this.model.grid
@@ -125,18 +128,70 @@ export class IonRangeSliderView extends AbstractSliderView {
       opts.prettify = this.model.prettify
       opts.force_edges = this.model.force_edges
       opts.prefix = this.model.prefix
-      opts.disable = this.model.disable
+      console.log(this.model.disabled)
+      opts.disable = this.model.disabled
 
       $(this.sliderEl).ionRangeSlider(opts);
+      console.log('prop')
+      console.log($(this.sliderEl).prop('value'))
+      $(this.sliderEl).on('change', (data) => this._slide(data)) // ~= slide
+      $(this.el).on('finish', (data) => this._change(data)) // ~= change
 
       console.log('[ionRangeSlider] Setting color')
       $(this.el).find('.irs-bar').css('background', this.model.bar_color)
       $(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
       $(this.el).find('.irs-single').css('background', this.model.bar_color)
 
+      if (this.callback_wrapper != null)
+          this.callback_wrapper()
+
+
+      if (this.titleEl != null)
+        this.el.removeChild(this.titleEl)
+      if (this.valueEl != null)
+        this.el.removeChild(this.valueEl)
+
+      if (this.model.title != null) {
+        if (this.model.title.length != 0) {
+          this.titleEl = label({}, `${this.model.title}:`)
+          this.el.insertBefore(this.titleEl, this.sliderEl)
+        }
+
+        if (this.model.show_value) {
+          const pretty = value.map((v) => this.model.pretty(v)).join(" .. ")
+          this.valueEl = div({class: "bk-slider-value"}, pretty)
+          this.el.insertBefore(this.valueEl, this.sliderEl)
+        }
+      } //endif: this.model.title != null
+    } //endif: this.sliderEl == null
+  } //function: render
+
+  protected _slide(data): void {
+    console.log('sliding!')
+    console.log($(this.sliderEl))
+    const ion_value = $(this.sliderEl).prop('value')
+    console.log(ion_value)
+    const value = this._calc_from(ion_value)
+    console.log(value)
+    this.model.value = value
+    if (this.callback_wrapper != null)
+      this.callback_wrapper()
+  }
+
+  protected _change(data): void {
+    const ion_value = $(this.sliderEl).prop('value')
+    const value = this._calc_from(ion_value)
+    this.model.value = value
+    switch (this.model.callback_policy) {
+      case 'mouseup':
+      case 'throttle': {
+        if (this.model.callback != null)
+          this.model.callback.execute(this.model)
+        break
+      }
     }
   }
-}
+} //namespace: IonRangeSliderView
 
       //    opts = {
       //      onChange: this.slide,
@@ -171,7 +226,6 @@ export namespace IonRangeSlider {
     prettify:          any
     force_edges:       boolean
     prefix:            string
-    disable:           boolean
   }
 
   export interface Props extends Widget.Props {}
@@ -199,7 +253,6 @@ export class IonRangeSlider extends AbstractSlider {
       prettify:          [ p.Any,         null         ],
       force_edges:       [ p.Bool,        false        ],
       prefix:            [ p.String,      ""           ],
-      disable:           [ p.Bool,        false        ],
     })
   }
   start = 0

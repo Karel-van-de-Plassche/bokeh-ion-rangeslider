@@ -88,7 +88,3 @@ class IonRangeSlider(AbstractSlider):
     prefix = String(default="", help="""
     Set prefix for values. Will be set up right before the number: $100
     """)
-
-    disable = Bool(default=False, help="""
-    Locks slider and makes it inactive.
-    """)
