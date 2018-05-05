@@ -9,11 +9,11 @@ import * as p from "core/properties"
 import {div, input} from "core/dom"
 import {logger} from "core/logging"
 import {Orientation, SliderCallbackPolicy} from "core/enums"
+import {repeat} from "core/util/array"
 
 // We will subclass in JavaScript from the same class that was subclassed
 // from in Python
 import {Widget, WidgetView} from "models/widgets/widget"
-import {SliderSpec} from "models/widgets/abstract_slider"
 import {AbstractSlider, AbstractSliderView, SliderSpec} from "models/widgets/abstract_slider"
 
 
@@ -29,7 +29,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     return {
       start: this.model.start,
       end: this.model.end,
-      value: this.model.value,
+      value: [this.model.value],
       step: this.model.step,
     }
   }
@@ -44,13 +44,12 @@ export class IonRangeSliderView extends AbstractSliderView {
     this.render()
   }
 
-  connect_signals(): void {
-    super.connect_signals()
-    this.connect(this.model.change, () => this.render())
-  }
-
   render(): void {
     logger.info(`[ionRangeSlider] Start rendering`)
+    logger.info(this.model)
+    if (this.model.format) {
+      logger.warn('[ionRangeSlider] Option format currently ignored')
+    }
     if (this.sliderEl == null) {
       logger.info(`[ionRangeSlider] am I here?`)
       // XXX: temporary workaround for _render_css()
@@ -82,10 +81,11 @@ export class IonRangeSliderView extends AbstractSliderView {
     }
     //
     // Set up parameters
-    //const prefix = 'bk-ionRange-'
+    const prefix = 'bk-ionRange-'
 
-    //const {start, end, value, step} = this._calc_to()
+    const {start, end, value, step} = this._calc_to()
 
+    //logger.info(`[ionRangeSlider] Setting tooltips`)
     //let tooltips: boolean | any[] // XXX
     //if (this.model.tooltips) {
     //  const formatter = {
@@ -97,67 +97,55 @@ export class IonRangeSliderView extends AbstractSliderView {
     //  tooltips = false
 
     this.el.classList.add("bk-slider")
+    console.log(this.sliderEl)
+    console.log(this.model.values)
+    console.log(this.model.values instanceof Array)
     if (this.sliderEl == null) {
-        this.sliderEl = input({type: "text", class: "slider", id: 'blah'})
+      //this.sliderEl = input({type: "text", class: "slider", id: this.model.id})
+      this.sliderEl = input({type: "text", class: "slider", id: 'blerger'})
       this.el.appendChild(this.sliderEl) // XXX: bad typings; no cssPrefix
 
 
-      $(this.sliderEl).ionRangeSlider({
-          disable: false
-      });
+      console.log('[ionRangeSlider] initializing external class')
+      var opts: IonRangeSliderOptions = {
+        type: this.model.slider_type,
+        cssPrefix: prefix,
+        disable: false
+      }
+      if (this.model.values instanceof Array) {
+        opts.values = this.model.values
+      } else {
+        opts.min = start
+        opts.max = end
+        opts.start = value
+        opts.step = step
+      }
+      opts.grid = this.model.grid
+      opts.prettify_enabled = this.model.prettify_enabled
+      opts.prettify = this.model.prettify
+      opts.force_edges = this.model.force_edges
+      opts.prefix = this.model.prefix
+      opts.disable = this.model.disable
+
+      $(this.sliderEl).ionRangeSlider(opts);
+
+      console.log('[ionRangeSlider] Setting color')
+      $(this.el).find('.irs-bar').css('background', this.model.bar_color)
+      $(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
+      $(this.el).find('.irs-single').css('background', this.model.bar_color)
+
     }
   }
 }
 
-      //    slider_type = this.model.slider_type
-      //    grid = this.model.grid
-      //    disable = this.model.disabled
-      //    prettify_enabled = this.model.prettify_enabled
-      //    force_edges = this.model.force_edges
-      //    prefix = this.model.prefix
       //    opts = {
-      //      type: slider_type,
-      //      grid: grid,
-      //      disable: disable,
       //      onChange: this.slide,
       //      onFinish: this.slidestop,
-      //      prettify_enabled: prettify_enabled,
-      //      prefix: prefix,
-      //      disable: disable,
-      //      force_edges: force_edges
       //    }
       //
-      //    if this.model.prettify
-      //      opts['prettify'] = this.prettify
-      //    if this.model.values
-      //      opts['values'] = this.model.values
-      //      min = this.model.start or 0
-      //      max = this.model.end or this.model.values.length
-      //    else
-      //      max = this.model.end
-      //      min = this.model.start
-      //      step = this.model.step or ((max - min)/50)
-      //      opts['step'] = step
-      //    opts['max'] = max
-      //    opts['min'] = min
-      //    range = this.model.range or [min, max]
-      //    opts['range'] = range
-      //    [from, to] = range
-      //    opts['from'] = from
-      //    opts['to'] = to
-      //
-      //    input = this.$el.find('.slider')[0]
-      //
-      //    slider = jQuery(input).ionRangeSlider(opts)
-      //    range = [from, to]
       //    this.model.range = range
       //    this.$el.find( "////{ this.model.id }" ).val( range.join(' - '))
       //    this.$el.find('.bk-slider-parent').height(this.model.height)
-      //    if this.model.color != ""
-      //      this.$el.find('.irs-bar').css('background', this.model.color)
-      //      this.$el.find('.irs-bar-edge').css('background', this.model.color)
-      //      this.$el.find('.irs-single').css('background', this.model.color)
-      //    return this.
       //
       //
       //  slidestop: (data) =>
@@ -176,29 +164,14 @@ export class IonRangeSliderView extends AbstractSliderView {
 
 export namespace IonRangeSlider {
   export interface Attrs extends Widget.Attrs {
-    //title: string
-    //show_value: boolean
-    //start: any // XXX
-    //end: any // XXX
-    //value: any // XXX
-    //step: number
-    //format: string
-    //orientation: Orientation
-    //direction: "ltr" | "rtl"
-    //tooltips: boolean
-    //callback: any // XXX
-    //callback_throttle: number
-    //callback_policy: SliderCallbackPolicy
-    //bar_color: Color
     slider_type:       string
-    range:             any
+    values:            any
     grid:              boolean
     prettify_enabled:  boolean
     prettify:          any
     force_edges:       boolean
     prefix:            string
     disable:           boolean
-    color:             string
   }
 
   export interface Props extends Widget.Props {}
@@ -219,35 +192,21 @@ export class IonRangeSlider extends AbstractSlider {
     this.prototype.default_view = IonRangeSliderView
 
     this.define({
-      //title:             [ p.String,      ""           ],
-      //show_value:        [ p.Bool,        true         ],
-      //start:             [ p.Number,      0            ],
-      //end:               [ p.Number,      1            ],
-      //value:             [ p.Any,                      ],
-      //step:              [ p.Number,      0.1          ],
-      //format:            [ p.String,      "0[.]00"     ],
-      //orientation:       [ p.Orientation, "horizontal" ],
-      //direction:         [ p.Any,         "ltr"        ],
-      //tooltips:          [ p.Boolean,     true         ],
-      //callback:          [ p.Instance                  ],
-      //callback_throttle: [ p.Number,      200          ],
-      //callback_policy:   [ p.String,      "throttle"   ], // TODO (bev) enum
-      //bar_color:         [ p.Color,       "#e6e6e6"    ],
       slider_type:       [ p.String,      "single"     ],
-      range:             [ p.Any,                      ],
+      values:            [ p.Any,                      ],
       grid:              [ p.Bool,        true         ],
       prettify_enabled:  [ p.Bool,        true         ],
       prettify:          [ p.Any,         null         ],
       force_edges:       [ p.Bool,        false        ],
       prefix:            [ p.String,      ""           ],
       disable:           [ p.Bool,        false        ],
-      color:             [ p.String,      ""           ],
-
     })
   }
-
-  behaviour: "drag" | "tap"
-  connected: false | boolean[] = false
+  start = 0
+  end   = 1
+  value = [0, 1]
+  step = 0.1
+  bar_color = null
 
   protected _formatter(value: number, _format: string): string {
     return `${value}`
