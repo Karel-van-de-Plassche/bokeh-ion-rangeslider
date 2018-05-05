@@ -83,5 +83,30 @@ gulp.task("copy-html-bokeh-test", function () {
 });
 
 gulp.task("bokeh-test", gulp.series("clean-test", ["copy-html-bokeh-test", "copy-css-test", "copy-img-test"], bokehTestBundle))
+
+var bokehIonTest = function() {
+    return browserify({
+        basedir: '.',
+        debug: true,
+        entries: ['test/bokeh_ion_test.ts'],
+        cache: {},
+        packageCache: {}
+    })
+    .plugin(tsify)
+}
+
+function bokehIonTestBundle() {
+    return bokehIonTest()
+    .bundle()
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest("test/build/site"));
+}
+
+gulp.task("copy-html-bokeh-ion-test", function () {
+    return gulp.src('test/bokeh_ion_test.html')
+        .pipe(gulp.dest('test/build/site/'));
+});
+
+gulp.task("bokeh-ion-test", gulp.series("clean-test", ["copy-html-bokeh-ion-test", "copy-css-test", "copy-img-test"], bokehIonTestBundle))
 //gulp.task('build', bundle.bind(null, b()));
 //w.on("update", bundle)

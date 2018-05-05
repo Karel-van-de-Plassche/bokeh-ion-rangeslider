@@ -14,9 +14,10 @@ import {Orientation, SliderCallbackPolicy} from "core/enums"
 // from in Python
 import {Widget, WidgetView} from "models/widgets/widget"
 import {SliderSpec} from "models/widgets/abstract_slider"
+import {AbstractSlider, AbstractSliderView, SliderSpec} from "models/widgets/abstract_slider"
 
 
-export class IonRangeSliderView extends WidgetView {
+export class IonRangeSliderView extends AbstractSliderView {
   model: IonRangeSlider
 
   protected sliderEl: null
@@ -49,12 +50,22 @@ export class IonRangeSliderView extends WidgetView {
   }
 
   render(): void {
+    logger.info(`[ionRangeSlider] Start rendering`)
     if (this.sliderEl == null) {
-    logger.debug(`[ionRangeSlider] am I here?`)
+      logger.info(`[ionRangeSlider] am I here?`)
       // XXX: temporary workaround for _render_css()
-      super.render()
+      this._render_classes() // XXX: because no super()
+
+      // LayoutDOMView sets up lots of helpful things, but
+      // it's render method is not suitable for widgets - who
+      // should provide their own.
+      if (this.model.height != null)
+        this.el.style.height = `${this.model.height}px`
+      if (this.model.width != null)
+        this.el.style.width = `${this.model.width}px`
     }
 
+    logger.info(`[ionRangeSlider] Setting callback`)
     if (this.model.callback != null) {
       const callback = () => this.model.callback.execute(this.model)
 
@@ -165,20 +176,20 @@ export class IonRangeSliderView extends WidgetView {
 
 export namespace IonRangeSlider {
   export interface Attrs extends Widget.Attrs {
-    title: string
-    show_value: boolean
-    start: any // XXX
-    end: any // XXX
-    value: any // XXX
-    step: number
-    format: string
-    orientation: Orientation
-    direction: "ltr" | "rtl"
-    tooltips: boolean
-    callback: any // XXX
-    callback_throttle: number
-    callback_policy: SliderCallbackPolicy
-    bar_color: Color
+    //title: string
+    //show_value: boolean
+    //start: any // XXX
+    //end: any // XXX
+    //value: any // XXX
+    //step: number
+    //format: string
+    //orientation: Orientation
+    //direction: "ltr" | "rtl"
+    //tooltips: boolean
+    //callback: any // XXX
+    //callback_throttle: number
+    //callback_policy: SliderCallbackPolicy
+    //bar_color: Color
     slider_type:       string
     range:             any
     grid:              boolean
@@ -195,7 +206,7 @@ export namespace IonRangeSlider {
 
 export interface IonRangeSlider extends IonRangeSlider.Attrs {}
 
-export class IonRangeSlider extends Widget {
+export class IonRangeSlider extends AbstractSlider {
 
   properties: IonRangeSlider.Props
 
@@ -208,20 +219,20 @@ export class IonRangeSlider extends Widget {
     this.prototype.default_view = IonRangeSliderView
 
     this.define({
-      title:             [ p.String,      ""           ],
-      show_value:        [ p.Bool,        true         ],
-      start:             [ p.Number,      0            ],
-      end:               [ p.Number,      1            ],
-      value:             [ p.Any,                      ],
-      step:              [ p.Number,      0.1          ],
-      format:            [ p.String,      "0[.]00"     ],
-      orientation:       [ p.Orientation, "horizontal" ],
-      direction:         [ p.Any,         "ltr"        ],
-      tooltips:          [ p.Boolean,     true         ],
-      callback:          [ p.Instance                  ],
-      callback_throttle: [ p.Number,      200          ],
-      callback_policy:   [ p.String,      "throttle"   ], // TODO (bev) enum
-      bar_color:         [ p.Color,       "#e6e6e6"    ],
+      //title:             [ p.String,      ""           ],
+      //show_value:        [ p.Bool,        true         ],
+      //start:             [ p.Number,      0            ],
+      //end:               [ p.Number,      1            ],
+      //value:             [ p.Any,                      ],
+      //step:              [ p.Number,      0.1          ],
+      //format:            [ p.String,      "0[.]00"     ],
+      //orientation:       [ p.Orientation, "horizontal" ],
+      //direction:         [ p.Any,         "ltr"        ],
+      //tooltips:          [ p.Boolean,     true         ],
+      //callback:          [ p.Instance                  ],
+      //callback_throttle: [ p.Number,      200          ],
+      //callback_policy:   [ p.String,      "throttle"   ], // TODO (bev) enum
+      //bar_color:         [ p.Color,       "#e6e6e6"    ],
       slider_type:       [ p.String,      "single"     ],
       range:             [ p.Any,                      ],
       grid:              [ p.Bool,        true         ],
