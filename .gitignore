@@ -1,0 +1,17 @@
+# Package Manager files
+bower_components/
+node_modules/
+
+# Webstorm
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+*.iws
+
+# Exclude tsc generated files
+js/*.map
+js/ts.js
+
+# Build folders
+build/
+dist/
+img/
