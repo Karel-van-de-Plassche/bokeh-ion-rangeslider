@@ -116,18 +116,22 @@ export class IonRangeSliderView extends AbstractSliderView {
         cssPrefix: prefix,
       }
       if (this.model.values instanceof Array) {
+        // If 'this.model.values' is provided, 'from' and 'to' are the indexes in the 'values' array.
         opts.values = this.model.values
+        opts.from = opts.values.findIndex(val => val == value[0])
+        opts.to = opts.values.findIndex(val => val == value[1])
       } else {
+        // For a normal slider, from and to are the actual value of the slider
         opts.min  = start
         opts.max  = end
         opts.step = step
+        opts.from = value[0]
+        opts.to   = value[1]
       }
-      opts.from = value[0]
-      opts.to   = value[1]
       opts.grid = this.model.grid
       opts.prettify_enabled = this.model.prettify_enabled
       opts.onChange = (_, __, values) => this._slide(values)
-      opts.onFinish= (_, __, values) => this._change(values)
+      opts.onFinish = (_, __, values) => this._change(values)
       if (this.model.prettify)
         opts.prettify = (f) => {return this._prettify(f) }
       opts.force_edges = this.model.force_edges
@@ -180,7 +184,6 @@ export class IonRangeSliderView extends AbstractSliderView {
   protected _change(data): void {
     const ion_value: string[] = $(this.sliderEl).prop('value')
     const value: number[] = this._calc_from(ion_value)
-    const value = this._calc_from(value)
     this.model.value = value
     switch (this.model.callback_policy) {
       case 'mouseup':
