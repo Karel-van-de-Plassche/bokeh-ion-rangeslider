@@ -50,18 +50,14 @@ export class IonRangeSliderView extends AbstractSliderView {
 
   initialize(options: any): void {
     super.initialize(options)
-    logger.info('Initialize function called, rendering..')
     this.render()
   }
 
   render(): void {
-    logger.info(`[ionRangeSlider] Start rendering`)
-    logger.info(this.model)
     if (this.model.format) {
       logger.warn('[ionRangeSlider] Option format currently ignored')
     }
     if (this.sliderEl == null) {
-      logger.info(`[ionRangeSlider] am I here?`)
       // XXX: temporary workaround for _render_css()
       this._render_classes() // XXX: because no super()
 
@@ -74,9 +70,7 @@ export class IonRangeSliderView extends AbstractSliderView {
         this.el.style.width = `${this.model.width}px`
     }
 
-    logger.info(`[ionRangeSlider] Setting callback`)
     if (this.model.callback != null) {
-      logger.info('[ionRangeSlider] Callback non-zero')
       const callback = () => this.model.callback.execute(this.model)
 
       switch (this.model.callback_policy) {
@@ -96,7 +90,6 @@ export class IonRangeSliderView extends AbstractSliderView {
 
     const {start, end, value, step} = this._calc_to()
 
-    //logger.info(`[ionRangeSlider] Setting tooltips`)
     //let tooltips: boolean | any[] // XXX
     //if (this.model.tooltips) {
     //  const formatter = {
@@ -114,7 +107,6 @@ export class IonRangeSliderView extends AbstractSliderView {
       this.el.appendChild(this.sliderEl) // XXX: bad typings; no cssPrefix
 
 
-      console.log('[ionRangeSlider] initializing external class')
       var opts: IonRangeSliderOptions = {
         type: this.model.slider_type,
         cssPrefix: prefix,
@@ -130,7 +122,8 @@ export class IonRangeSliderView extends AbstractSliderView {
       opts.to   = value[1]
       opts.grid = this.model.grid
       opts.prettify_enabled = this.model.prettify_enabled
-      opts.prettify = this.model.prettify
+      if (this.model.prettify)
+        opts.prettify = (f) => {return this._prettify(f) }
       opts.force_edges = this.model.force_edges
       opts.prefix = this.model.prefix
       opts.disable = this.model.disabled
@@ -139,7 +132,6 @@ export class IonRangeSliderView extends AbstractSliderView {
       $(this.sliderEl).on('change', (data) => this._slide(data)) // ~= slide
       $(this.el).on('finish', (data) => this._change(data)) // ~= change
 
-      console.log('[ionRangeSlider] Setting color')
       $(this.el).find('.irs-bar').css('background', this.model.bar_color)
       $(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
       $(this.el).find('.irs-single').css('background', this.model.bar_color)
@@ -168,8 +160,13 @@ export class IonRangeSliderView extends AbstractSliderView {
     } //endif: this.sliderEl == null
   } //function: render
 
+  protected _prettify(data): void {
+    if (this.model)
+      if (this.model.prettify)
+        return this.model.prettify.execute(data)
+  }
   protected _slide(data): void {
-    console.log('sliding!')
+    logger.log('sliding!')
     const ion_value: string[] = $(this.sliderEl).prop('value')
     const value: number[] = this._calc_from(ion_value)
     this.model.value = value
@@ -178,7 +175,7 @@ export class IonRangeSliderView extends AbstractSliderView {
   }
 
   protected _change(data): void {
-    console.log('changing!')
+    logger.log('changing!')
     const ion_value: string[] = $(this.sliderEl).prop('value')
     const value: number[] = this._calc_from(ion_value)
     const value = this._calc_from(value)

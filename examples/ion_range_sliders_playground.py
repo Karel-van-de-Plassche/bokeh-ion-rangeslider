@@ -27,6 +27,14 @@ only_value_slider = IonRangeSlider(value=[50, 50], start=0, end=96, step=5)
 
 no_title_slider = IonRangeSlider(title=None, value=[50, 50], start=0, end=96, step=5)
 
+round = CustomJS(code="""
+         var f = cb_obj
+         f = Number(f.toPrecision(2))
+         return f
+     """)
+
+prettified_slider = IonRangeSlider(title=None, values=[1, 2, 3.141592, 1000000], start=0, end=96, step=5, prettify=round)
+
 def color_picker():
     def color_slider(title, color):
         return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color)
@@ -38,12 +46,8 @@ def color_picker():
     div = Div(width=100, height=100, style=dict(backgroundColor="rgb(127, 127, 127"))
 
     cb = CustomJS(args=dict(red=red, green=green, blue=blue, div=div), code="""
-        console.log('setting color!')
         var color = "rgb(" + red.value[0] + ", " + green.value[0] + ", " + blue.value[0] + ")";
-        console.log(color)
         div.style = {backgroundColor: color};
-        console.log('setting color!')
-        console.log(div)
     """)
 
     red.callback   = cb
@@ -56,11 +60,6 @@ def color_picker():
         WidgetBox(width=50, children=[blue]),
         div,
     ])
-round = CustomJS(code="""
-         var f = cb_obj
-         f = Number(f.toPrecision(2))
-         return f
-     """)
 test_slider = IonRangeSlider(slider_type='double', start=0, end=77, values=[1,2,3.123123,40.1234], prettify=round)
 
 sliders = Row(children=[
@@ -70,6 +69,7 @@ sliders = Row(children=[
         range_slider,
         only_value_slider,
         no_title_slider,
+        prettified_slider
     ]),
     color_picker(),
 ])
