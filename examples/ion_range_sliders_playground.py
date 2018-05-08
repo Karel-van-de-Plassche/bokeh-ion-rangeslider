@@ -7,7 +7,7 @@ sys.path.append('..')
 
 from IPython import embed
 
-from bokeh.io import show, save
+from bokeh.io import show, save, curdoc
 from bokeh.document import Document
 from bokeh.embed import file_html
 from bokeh.resources import INLINE
@@ -37,7 +37,7 @@ prettified_slider = IonRangeSlider(title=None, values=[1, 2, 3.141592, 1000000],
 
 def color_picker():
     def color_slider(title, color):
-        return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color)
+        return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color, grid=False)
 
     red   = color_slider("R", "red")
     green = color_slider("G", "green")
@@ -60,6 +60,39 @@ def color_picker():
         WidgetBox(width=50, children=[blue]),
         div,
     ])
+
+def color_picker_python():
+    def color_slider(title, color):
+        return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color, grid=False)
+
+    red   = color_slider("R", "red")
+    green = color_slider("G", "green")
+    blue  = color_slider("B", "blue")
+
+    div = Div(width=100, height=100, style=dict(backgroundColor="rgb(127, 127, 127"))
+
+    cb = CustomJS(args=dict(red=red, green=green, blue=blue, div=div), code="""
+        var color = "rgb(" + red.value[0] + ", " + green.value[0] + ", " + blue.value[0] + ")";
+        div.style = {backgroundColor: color};
+    """)
+    def callback(attr, old, new):
+        #color = slider._property_values['bar_color']
+        div.style['backgroundColor'] = 'rgb({:d},{:d},{:d})'.format(red.value[0], green.value[0], blue.value[0])
+        return
+
+    red.on_change('value', callback)
+    green.on_change('value', callback)
+    blue.on_change('value', callback)
+
+    return Column(children=[
+        Div(text="Only works with 'bokeh serve'"),
+        Row(children=[
+            WidgetBox(width=50, children=[red]),
+            WidgetBox(width=50, children=[green]),
+            WidgetBox(width=50, children=[blue]),
+            div,
+        ])
+    ])
 test_slider = IonRangeSlider(slider_type='double', start=0, end=77, values=[1,2,3.123123,40.1234], prettify=round)
 
 sliders = Row(children=[
@@ -71,10 +104,13 @@ sliders = Row(children=[
         no_title_slider,
         prettified_slider
     ]),
-    color_picker(),
+   Column(children=[
+        color_picker(),
+        color_picker_python(),
+    ])
 ])
 
-doc = Document()
+doc = curdoc()
 doc.add_root(sliders)
 save(doc)
 

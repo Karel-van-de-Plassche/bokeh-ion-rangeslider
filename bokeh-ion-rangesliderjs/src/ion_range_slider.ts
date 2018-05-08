@@ -55,7 +55,7 @@ export class IonRangeSliderView extends AbstractSliderView {
 
   render(): void {
     if (this.model.format) {
-      logger.warn('[ionRangeSlider] Option format currently ignored')
+      console.warn('[ionRangeSlider] Option format currently ignored')
     }
     if (this.sliderEl == null) {
       // XXX: temporary workaround for _render_css()
@@ -81,6 +81,10 @@ export class IonRangeSliderView extends AbstractSliderView {
         case 'throttle': {
           this.callback_wrapper = throttle(callback, this.model.callback_throttle)
           break
+        }
+        default: {
+            console.warn('[ionRangeSlider] Unexpected callback_policy')
+            this.callback_wrapper = callback
         }
       }
     }
@@ -122,6 +126,8 @@ export class IonRangeSliderView extends AbstractSliderView {
       opts.to   = value[1]
       opts.grid = this.model.grid
       opts.prettify_enabled = this.model.prettify_enabled
+      opts.onChange = (_, __, values) => this._slide(values)
+      opts.onFinish= (_, __, values) => this._change(values)
       if (this.model.prettify)
         opts.prettify = (f) => {return this._prettify(f) }
       opts.force_edges = this.model.force_edges
@@ -129,8 +135,6 @@ export class IonRangeSliderView extends AbstractSliderView {
       opts.disable = this.model.disabled
 
       $(this.sliderEl).ionRangeSlider(opts);
-      $(this.sliderEl).on('change', (data) => this._slide(data)) // ~= slide
-      $(this.el).on('finish', (data) => this._change(data)) // ~= change
 
       $(this.el).find('.irs-bar').css('background', this.model.bar_color)
       $(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
@@ -166,16 +170,14 @@ export class IonRangeSliderView extends AbstractSliderView {
         return this.model.prettify.execute(data)
   }
   protected _slide(data): void {
-    logger.log('sliding!')
     const ion_value: string[] = $(this.sliderEl).prop('value')
     const value: number[] = this._calc_from(ion_value)
     this.model.value = value
-    if (this.callback_wrapper != null)
-      this.callback_wrapper()
+      if (this.callback_wrapper != null)
+        this.callback_wrapper()
   }
 
   protected _change(data): void {
-    logger.log('changing!')
     const ion_value: string[] = $(this.sliderEl).prop('value')
     const value: number[] = this._calc_from(ion_value)
     const value = this._calc_from(value)
