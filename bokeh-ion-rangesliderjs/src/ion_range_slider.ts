@@ -1,19 +1,15 @@
-//jQuery(input).ionRangeSlider(opts)
 //import $ = require('jquery')
-//import "ion-rangeslider"
+//import {IonRangeSliderOptions, IonRangeSliderEvent} from "ion-rangeslider"
 
 import {throttle} from "core/util/callback"
-import {Color} from "core/types"
 // The "core/properties" module has all the property types
 import * as p from "core/properties"
 import {div, input, label} from "core/dom"
 import {logger} from "core/logging"
-import {Orientation, SliderCallbackPolicy} from "core/enums"
-import {repeat} from "core/util/array"
 
 // We will subclass in JavaScript from the same class that was subclassed
 // from in Python
-import {Widget, WidgetView} from "models/widgets/widget"
+import {Widget} from "models/widgets/widget"
 import {AbstractSlider, AbstractSliderView, SliderSpec} from "models/widgets/abstract_slider"
 
 

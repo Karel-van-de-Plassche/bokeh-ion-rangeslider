@@ -18,6 +18,7 @@ from bokeh.models.callbacks import CustomJS
 from bokeh_ion_rangeslider import *
 
 slider = IonRangeSlider(title="Numerical", value=[50, 10000], start=0, end=96, step=5)
+duo_slider = IonRangeSlider(slider_type='double', title="Numerical", value=[50, 10000], start=0, end=96, step=5)
 
 disabled_slider = IonRangeSlider(title="Disabled", value=[50, 50], start=0, end=96, step=5, disabled=True)
 
@@ -34,6 +35,7 @@ round = CustomJS(code="""
      """)
 
 prettified_slider = IonRangeSlider(title=None, values=[1, 2, 3.141592, 1000000], start=0, end=96, step=5, prettify=round)
+string_slider = IonRangeSlider(title=None, values=['apple', 'banana', 'cherry', 'kiwi'], value=('banana', 'banana'), prettify=round)
 
 def color_picker():
     def color_slider(title, color):
@@ -98,11 +100,13 @@ test_slider = IonRangeSlider(slider_type='double', start=0, end=77, values=[1,2,
 sliders = Row(children=[
     Column(children=[
         slider,
+        duo_slider,
         disabled_slider,
         range_slider,
         only_value_slider,
         no_title_slider,
-        prettified_slider
+        prettified_slider,
+        string_slider
     ]),
    Column(children=[
         color_picker(),
