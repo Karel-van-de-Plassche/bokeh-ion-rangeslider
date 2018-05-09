@@ -4,7 +4,7 @@ import os
 
 from IPython import embed
 
-from bokeh.core.properties import Bool, Float, String, Enum, Tuple, Instance, Color, List, Any
+from bokeh.core.properties import Bool, Float, String, Enum, Tuple, Instance, Color, List, Any, Override
 from bokeh.core.enums import SliderCallbackPolicy, enumeration
 from bokeh.models.widgets import Div
 from bokeh.models.callbacks import Callback
@@ -35,6 +35,12 @@ class IonRangeSlider(AbstractSlider):
     # can be found here:
     #
     #    http://bokeh.pydata.org/en/latest/docs/reference/core.html#bokeh-core-properties
+
+    bar_color = Override(default='#ed5565')
+
+    title = Override(default='')
+
+    show_value = Override(default=False)
 
     start = Float(default=0, help="""
     The minimum allowable value.

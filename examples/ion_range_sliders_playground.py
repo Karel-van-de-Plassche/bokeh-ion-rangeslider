@@ -17,12 +17,12 @@ from bokeh.models.widgets import Div
 from bokeh.models.callbacks import CustomJS
 from bokeh_ion_rangeslider import *
 
-slider = IonRangeSlider(title="Numerical", value=[50, 10000], start=0, end=96, step=5)
-duo_slider = IonRangeSlider(slider_type='double', title="Numerical", value=[50, 10000], start=0, end=96, step=5)
+default_slider = IonRangeSlider()
+slider = IonRangeSlider(title="Numerical", value=[50, 10000], start=0, end=96, step=5, show_value=True)
 
-disabled_slider = IonRangeSlider(title="Disabled", value=[50, 50], start=0, end=96, step=5, disabled=True)
+disabled_slider = IonRangeSlider(title="Disabled", value=[50, 50], start=0, end=96, step=5, disabled=True, show_value=True)
 
-range_slider = IonRangeSlider(title="Numerical range", value=[30, 70], start=0, end=100, step=0.5)
+range_slider = IonRangeSlider(slider_type='double', title="Numerical range", value=[30, 70], start=0, end=100, step=0.5, show_value=True)
 
 only_value_slider = IonRangeSlider(value=[50, 50], start=0, end=96, step=5)
 
@@ -99,8 +99,8 @@ test_slider = IonRangeSlider(slider_type='double', start=0, end=77, values=[1,2,
 
 sliders = Row(children=[
     Column(children=[
+        default_slider,
         slider,
-        duo_slider,
         disabled_slider,
         range_slider,
         only_value_slider,
