@@ -23,6 +23,7 @@ export class IonRangeSliderView extends AbstractSliderView {
   protected sliderEl: null
   protected titleEl: HTMLElement
   protected valueEl: HTMLElement
+  protected value_type: string
   protected callback_wrapper?: () => void
 
   protected _calc_to(): SliderSpec {
@@ -34,17 +35,29 @@ export class IonRangeSliderView extends AbstractSliderView {
     }
   }
 
-  protected _calc_from(values: string[] | string): number[] {
-    var parsed_values: number[]
+  protected _calc_from(values: string[] | string): string[] | number[] {
+    var parsed_values: number[] | string[]
 
     if (!(values instanceof Array)) {
+      switch(this.value_type) {
+        case 'number':
+          var parsed_value: number = parseFloat(values)
+          parsed_values = new Array(parsed_value, parsed_value)
+          break;
+        case 'string':
+          parsed_values = new Array(values, values)
+          break;
+        }
         //var values: number[] = [values, values]
-      var parsed_value: number = parseFloat(values)
-      parsed_values = new Array(parsed_value, parsed_value)
     } else {
-      parsed_values = values.map(parseFloat)
+      switch(this.value_type) {
+        case 'number':
+          parsed_values = values.map(parseFloat)
+          break;
+        case 'string':
+          parsed_values = values
+      }
     }
-
     return parsed_values
   }
 
@@ -128,6 +141,7 @@ export class IonRangeSliderView extends AbstractSliderView {
         opts.from = value[0]
         opts.to   = value[1]
       }
+      this.value_type = typeof value[0]
       opts.grid = this.model.grid
       opts.prettify_enabled = this.model.prettify_enabled
       opts.onChange = (_, __, values) => this._slide(values)
@@ -175,7 +189,7 @@ export class IonRangeSliderView extends AbstractSliderView {
   }
   protected _slide(data): void {
     const ion_value: string[] = $(this.sliderEl).prop('value')
-    const value: number[] = this._calc_from(ion_value)
+    const value: number[] | string[] = this._calc_from(ion_value)
     this.model.value = value
       if (this.callback_wrapper != null)
         this.callback_wrapper()
@@ -183,7 +197,7 @@ export class IonRangeSliderView extends AbstractSliderView {
 
   protected _change(data): void {
     const ion_value: string[] = $(this.sliderEl).prop('value')
-    const value: number[] = this._calc_from(ion_value)
+    const value: number[] | string[] = this._calc_from(ion_value)
     this.model.value = value
     switch (this.model.callback_policy) {
       case 'mouseup':
