@@ -32,28 +32,22 @@ export class IonRangeSliderView extends AbstractSliderView {
   }
 
   protected _calc_from(values: string[] | string): string[] | number[] {
-    var parsed_values: number[] | string[] = Array()
+    var parsed_values: string[] | number[]
 
-    if (!(values instanceof Array)) {
-      switch(this.value_type) {
-        case 'number':
-          var parsed_value: number = parseFloat(values)
-          parsed_values = new Array(parsed_value, parsed_value)
-          break;
-        case 'string':
-          parsed_values = new Array(values, values)
-          break;
-        }
-        //var values: number[] = [values, values]
+    if (this.model.slider_type === 'double') {
+        parsed_values = values.split(';')
     } else {
-      switch(this.value_type) {
-        case 'number':
-          parsed_values = values.map(parseFloat)
-          break;
-        case 'string':
+        if (!(values instanceof Array)) {
+          parsed_values = new Array(values, values)
+        } else {
           parsed_values = values
-      }
+        }
     }
+
+    if (parsed_values.every($.isNumeric)) {
+        parsed_values = parsed_values.map(Number)
+    }
+
     return parsed_values
   }
 
