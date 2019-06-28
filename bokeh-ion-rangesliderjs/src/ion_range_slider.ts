@@ -73,13 +73,13 @@ export class IonRangeSliderView extends AbstractSliderView {
     return NaN
   }
 
-  protected _calc_from_ion(data: any): number | number[] | string | string[] {
+  protected _calc_from_ion(data: any): number[] | string[] {
     // Extract slider positions from ionRangeSlider data structure.
     // If 'values' was given and was an array of strings, these are strings
     // If 'values' was not given or an array of numbers, these are numbers
     if (data.to_value == null) {
       // single slider
-      return data.from_value
+      return [data.from_value]
     } else {
       // range slider
       return [data.from_value, data.to_value]
@@ -107,6 +107,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     ControlView.prototype.render.call(this)
 
     const {start, end, value, step} = this._calc_to()
+    console.log(value)
 
     // XXX: tooltips not implemented/applicable
     //if (this.model.tooltips) {
@@ -134,10 +135,25 @@ export class IonRangeSliderView extends AbstractSliderView {
         opts.to   = value[1]
       } else {
         // If values is given min, max and step are ignored.
+        // So in turn, bokeh's start, end and step are ignored.
         opts.values = this.model.values
+        this.model.start = this.model.values[0]
+        this.model.step = NaN
+        this.model.end = this.model.values[this.model.values.length - 1]
+        // start and end are interpreted as the starting values
         opts.from = opts.values.findIndex((val: string | number) => val == value[0])
+        if (opts.from == -1) {
+          console.warn("Requested model.value[0] not found in 'values' array")
+          opts.from = undefined
+        }
         opts.to = opts.values.findIndex((val: string | number) => val == value[1])
+        if (opts.to == -1) {
+          console.warn("Requested model.value[1] not found in 'values' array")
+          opts.to = undefined
+        }
       }
+      console.log(opts.from)
+      console.log(opts.to)
       opts.grid = this.model.grid // Enables grid of values under the slider
       opts.prettify_enabled = this.model.prettify_enabled // Enable ionRanges prettify functionality
       if (this.model.prettify)
@@ -192,7 +208,7 @@ export namespace IonRangeSlider {
 
   export type Props = AbstractSlider.Props & {
     slider_type: p.Property<string>
-    values: p.Property<string|string[]|number|number[]>
+    values: p.Property<string[]|number[]>
     grid: p.Property<boolean>
     prettify_enabled: p.Property<boolean>
     prettify: p.Property<any>
