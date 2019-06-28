@@ -1,24 +1,15 @@
-//import {throttle} from "core/util/callback"
-
 // The "core/properties" module has all the property types
 import * as p from "core/properties"
 
 // HTML construction and manipulation functions
 import {div, input} from "core/dom"
 
-import {SliderCallbackPolicy} from "core/enums"
-
 // We will subclass in JavaScript from the same class that was subclassed
 // from in Python
 import {AbstractSlider, AbstractSliderView, SliderSpec} from "models/widgets/abstract_slider"
 import {ControlView} from "models/widgets/control"
-import {throttle} from "core/util/callback"
-throttle // Stop TS from complaining
 
 declare function jQuery(...args: any[]): any
-
-const prefix = 'bk-ionRange-'
-prefix // Stop TS from complaining
 
 export interface StringSliderSpec {
   start: number
@@ -39,6 +30,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     const {callback, callback_policy, callback_throttle} = this.model.properties
     this.on_change([callback, callback_policy, callback_throttle], () => this._init_callback())
 
+    // TODO: Implement signals for ionRangeSlider
     //const {start, end, value, step, title} = this.model.properties
     //this.on_change([start, end, value, step], () => {
     //  const {start, end, value, step} = this._calc_to()
@@ -54,6 +46,7 @@ export class IonRangeSliderView extends AbstractSliderView {
       this._set_bar_color()
     })
 
+    // TODO: Implement tital update for ionRangeSlider
     //this.on_change([value, title], () => this._update_title())
   }
 
@@ -84,7 +77,6 @@ export class IonRangeSliderView extends AbstractSliderView {
     // Extract slider positions from ionRangeSlider data structure.
     // If 'values' was given and was an array of strings, these are strings
     // If 'values' was not given or an array of numbers, these are numbers
-    console.log(typeof data.from_value)
     if (data.to_value == null) {
       // single slider
       return data.from_value
@@ -125,9 +117,6 @@ export class IonRangeSliderView extends AbstractSliderView {
     //  tooltips = repeat(formatter, value.length)
     //} else
     //  tooltips = false
-    //const [from, to] = this.model.range || [max, min]
-    const from = value[0]
-    const to = value[1]
     if (this.slider_el == null) {
       // Slider does not exists, initialize
       this.slider_el = input({type: "text"}) as any
@@ -149,27 +138,28 @@ export class IonRangeSliderView extends AbstractSliderView {
         opts.from = opts.values.findIndex((val: string | number) => val == value[0])
         opts.to = opts.values.findIndex((val: string | number) => val == value[1])
       }
+      opts.grid = this.model.grid // Enables grid of values under the slider
       opts.prettify_enabled = this.model.prettify_enabled // Enable ionRanges prettify functionality
       if (this.model.prettify)
         // Enable user supplied JS function
         opts.prettify = (f: any) => {return this._prettify(f) }
-      opts.grid = this.model.grid // Enables grid of values under the slider
 
       opts.onChange = (values: any) => this._slide(values) // Triggers on values change
-      //opts.onChange = function (data: any) {
-      //      console.dir(data);
-      //  }
-      //opts.onFinish = (_, __, values) => this._change(values) // Triggers when user releases handle
+      opts.onFinish = (values: any) => this._change(values) // Triggers when user releases handle
 
       opts.force_edges = this.model.force_edges // Force ionRangeSlider to be inside its container
       opts.prefix = this.model.prefix // Prepend on handle before the value displayed
       opts.disable = this.model.disabled // Disable slider
 
-      //this.value_type = typeof value[0] // Save if the value is a number or a string
       jQuery(this.slider_el).ionRangeSlider(opts)
-      if (this.value_el != null)
-        this.value_el.value = `${from} - ${to}`
+
+      //TODO: Changing color of the bars
+      //$(this.el).find('.irs-bar').css('background', this.model.bar_color)
+      //$(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
+      //$(this.el).find('.irs-single').css('background', this.model.bar_color)
     }
+    if (this.value_el != null)
+      this.value_el.value = `${value[0]} - ${value[1]}`
   }
 
   protected _slide(data: any): void {
@@ -203,17 +193,11 @@ export namespace IonRangeSlider {
   export type Props = AbstractSlider.Props & {
     slider_type: p.Property<string>
     values: p.Property<string|string[]|number|number[]>
-    //range: p.Property<[number, number]>
-    start: p.Property<number>
-    end: p.Property<number>
-    step: p.Property<number>
     grid: p.Property<boolean>
     prettify_enabled: p.Property<boolean>
     prettify: p.Property<any>
     force_edges: p.Property<boolean>
     prefix: p.Property<string>
-    callback_throttle: p.Property<number>
-    callback_policy: p.Property<SliderCallbackPolicy>
   }
 }
 
@@ -242,24 +226,18 @@ export class IonRangeSlider extends AbstractSlider {
     this.define<IonRangeSlider.Props>({
       slider_type:       [ p.String,      "single"     ],
       values:            [ p.Any,                      ],
-      //range:             [ p.Any                              ],
-      //start:             [ p.Number,               0          ],
-      //end:               [ p.Number,               1          ],
-      //step:              [ p.Number,               0.1        ],
       grid:              [ p.Boolean,              true       ],
       prettify_enabled:  [ p.Boolean,        true         ],
       prettify:          [ p.Any,         null         ],
       force_edges:       [ p.Boolean,        false        ],
       prefix:            [ p.String,      ""           ],
-      //callback_throttle: [ p.Number,               200        ],
-      //callback_policy:   [ p.SliderCallbackPolicy, "throttle" ],
     })
 
     this.override({
       bar_color: '#ed5565',
       start: 0,
       end: 1,
-      value: ['fish', 'pie'],
+      value: ['string0', 'string1'],
       step: 0.1,
       show_value: false,
       title: '',
