@@ -18,10 +18,14 @@ export interface StringSliderSpec {
   step: number
 }
 
+const prefix = 'bk-ionRange-'
+prefix // Stop TS from complaining
+
 export class IonRangeSliderView extends AbstractSliderView {
   model: IonRangeSlider
 
   protected value_el?: HTMLInputElement
+  protected input_el: HTMLInputElement
 
   connect_signals(): void {
     // Workaround to call the grandparent connect_signals
@@ -120,8 +124,16 @@ export class IonRangeSliderView extends AbstractSliderView {
     //  tooltips = false
     if (this.slider_el == null) {
       // Slider does not exists, initialize
-      this.slider_el = input({type: "text"}) as any
-      this.el.appendChild(div({style: {width: "100%"}}, this.slider_el))
+      this.input_el = input({type: "text"}) as any
+
+      // TODO: Replace by bk_slider_title loaded from styles/widgets/sliders
+      this.title_el = div({class: "bk-slider-title"})
+
+      // TODO: Replace by bk_input_group loaded from styles/widgets/sliders
+      // ionRangeSlider will make a span in the div containing this.input_el
+      // It has to exists before calling .ionRangeSlider initializer
+      this.group_el = div({class: "bk-input-group"}, this.title_el, this.input_el)
+      this.el.appendChild(this.group_el)
       // Set up IonRangeSlider option based on
       const opts = {
         type: this.model.slider_type,
@@ -167,12 +179,21 @@ export class IonRangeSliderView extends AbstractSliderView {
       opts.prefix = this.model.prefix // Prepend on handle before the value displayed
       opts.disable = this.model.disabled // Disable slider
 
-      jQuery(this.slider_el).ionRangeSlider(opts)
+      jQuery(this.input_el).ionRangeSlider(opts)
 
       //TODO: Changing color of the bars
       //$(this.el).find('.irs-bar').css('background', this.model.bar_color)
       //$(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
       //$(this.el).find('.irs-single').css('background', this.model.bar_color)
+      for (var i = 0; i < this.group_el.children.length; i++) {
+        var child = this.group_el.children[i] as HTMLElement
+        var classes = child.classList
+        if (classes.contains('irs')) {
+          this.slider_el = child
+          this.slider_el.style.width = '100%'
+          break
+        }
+      }
     }
     if (this.value_el != null)
       this.value_el.value = `${value[0]} - ${value[1]}`
