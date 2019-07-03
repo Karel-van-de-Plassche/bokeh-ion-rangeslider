@@ -4,7 +4,7 @@ import os
 
 from IPython import embed
 
-from bokeh.core.properties import Bool, Float, String, Enum, Tuple, Instance, Color, List, Any, Override
+from bokeh.core.properties import Bool, Float, String, Enum, Tuple, Instance, Color, List, Any, Override, Either
 from bokeh.core.enums import SliderCallbackPolicy, enumeration
 from bokeh.models.widgets import Div
 from bokeh.models.callbacks import Callback
@@ -42,15 +42,19 @@ class IonRangeSlider(AbstractSlider):
 
     show_value = Override(default=False)
 
-    start = Float(default=0, help="""
+    start = Any(default=0, help="""
     The minimum allowable value.
     """)
 
-    end = Float(default=1, help="""
+    end = Any(default=1, help="""
     The maximum allowable value.
     """)
 
-    value = Tuple(Any, Any, default = [0, 1], help="""
+    value = Either(Tuple(Any, Any), Any, default = [0, 1], help="""
+    Initial or selected range.
+    """)
+
+    value_throttled =  Either(Tuple(Any, Any), Any, default = [0, 1], help="""
     Initial or selected range.
     """)
 
