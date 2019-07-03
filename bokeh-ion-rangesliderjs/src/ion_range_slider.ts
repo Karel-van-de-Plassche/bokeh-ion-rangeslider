@@ -71,7 +71,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     }
   }
 
-  protected _calc_from(values: number[]): number | number[] {
+  protected _calc_from(values: number[]): number {
     console.error('_calc_from should never be called by ionRangeSlider!')
     values // Stop TS from complaining
     return NaN
@@ -81,12 +81,25 @@ export class IonRangeSliderView extends AbstractSliderView {
     // Extract slider positions from ionRangeSlider data structure.
     // If 'values' was given and was an array of strings, these are strings
     // If 'values' was not given or an array of numbers, these are numbers
-    if (data.to_value == null) {
-      // single slider
-      return [data.from_value]
+    // If values was given on initialization, data.from_value contains the value
+    // of the slider. Else, the value is in the data.from attribute. This is 
+    // different than documented, see https://github.com/IonDen/ion.rangeSlider/issues/639
+    if (this.model.values == null) {
+      if (data.to == null) {
+        // single slider
+        return data.from
+      } else {
+        // range slider
+        return [data.from, data.to]
+      }
     } else {
-      // range slider
-      return [data.from_value, data.to_value]
+      if (data.to_value == null) {
+        // single slider
+        return data.from_value
+      } else {
+        // range slider
+        return [data.from_value, data.to_value]
+      }
     }
   }
 
@@ -111,7 +124,6 @@ export class IonRangeSliderView extends AbstractSliderView {
     ControlView.prototype.render.call(this)
 
     const {start, end, value, step} = this._calc_to()
-    console.log(value)
 
     // XXX: tooltips not implemented/applicable
     //if (this.model.tooltips) {
@@ -164,8 +176,6 @@ export class IonRangeSliderView extends AbstractSliderView {
           opts.to = undefined
         }
       }
-      console.log(opts.from)
-      console.log(opts.to)
       opts.grid = this.model.grid // Enables grid of values under the slider
       opts.prettify_enabled = this.model.prettify_enabled // Enable ionRanges prettify functionality
       if (this.model.prettify)
