@@ -12,9 +12,11 @@ from bokeh.document import Document
 from bokeh.embed import file_html
 from bokeh.resources import INLINE
 from bokeh.util.browser import view
+from bokeh.models import ColumnDataSource
 from bokeh.models.layouts import Row, Column, WidgetBox
 from bokeh.models.widgets import Div
 from bokeh.models.callbacks import CustomJS
+from bokeh.plotting import figure
 from bokeh_ion_rangeslider import *
 
 default_slider = IonRangeSlider()
@@ -37,64 +39,88 @@ round = CustomJS(code="""
 prettified_slider = IonRangeSlider(title=None, values=[1, 2, 3.141592, 1000000], start=0, end=96, step=5, prettify=round)
 string_slider = IonRangeSlider(title=None, values=['apple', 'banana', 'cherry', 'kiwi'], value=('banana', 'banana'), prettify=round)
 
+def color_slider(title, color):
+    return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color, grid=False, width=50)
 def color_picker():
-    def color_slider(title, color):
-        return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color, grid=False)
 
     red   = color_slider("R", "red")
     green = color_slider("G", "green")
     blue  = color_slider("B", "blue")
+    hex_color = '#888888'
+    source = ColumnDataSource(data=dict(color=[hex_color]))
 
-    div = Div(width=100, height=100, style=dict(backgroundColor="rgb(127, 127, 127"))
+    p1 = figure(x_range=(-8, 8), y_range=(-4, 4),
+            plot_width=100, plot_height=100,
+            title='move sliders to change', tools='', toolbar_location=None)
+    p1.axis.visible = False
+    p1.rect(0, 0, width=18, height=10, fill_color='color',
+        line_color = 'black', source=source)
 
-    cb = CustomJS(args=dict(red=red, green=green, blue=blue, div=div), code="""
-        var color = "rgb(" + red.value[0] + ", " + green.value[0] + ", " + blue.value[0] + ")";
-        div.style = {backgroundColor: color};
+    cb = CustomJS(args=dict(source=source, red=red, green=green, blue=blue), code="""
+        function componentToHex(c) {
+            var hex = c.toString(16)
+            return hex.length == 1 ? "0" + hex : hex
+        }
+        function rgbToHex(r, g, b) {
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b)
+        }
+        function toInt(v) {
+           return v | 0
+        }
+        const color = source.data['color']
+        const R = toInt(red.value[0])
+        const G = toInt(green.value[0])
+        const B = toInt(blue.value[0])
+        color[0] = rgbToHex(R, G, B)
+        source.change.emit()
     """)
 
-    red.callback   = cb
-    green.callback = cb
-    blue.callback  = cb
+    red.js_on_change('value_throttled', cb)
+    green.js_on_change('value_throttled', cb)
+    blue.js_on_change('value_throttled', cb)
 
     return Row(children=[
-        WidgetBox(width=50, children=[red]),
-        WidgetBox(width=50, children=[green]),
-        WidgetBox(width=50, children=[blue]),
-        div,
+        red,
+        green,
+        blue,
+        p1,
     ])
 
 def color_picker_python():
-    def color_slider(title, color):
-        return IonRangeSlider(title=title, show_value=False, height=300, value=[127, 127], start=0, end=255, step=1, orientation="vertical", bar_color=color, grid=False)
 
     red   = color_slider("R", "red")
     green = color_slider("G", "green")
     blue  = color_slider("B", "blue")
 
-    div = Div(width=100, height=100, style=dict(backgroundColor="rgb(127, 127, 127"))
+    hex_color = '#888888'
+    source = ColumnDataSource(data=dict(color=[hex_color]))
 
-    cb = CustomJS(args=dict(red=red, green=green, blue=blue, div=div), code="""
-        var color = "rgb(" + red.value[0] + ", " + green.value[0] + ", " + blue.value[0] + ")";
-        div.style = {backgroundColor: color};
-    """)
+    p2 = figure(x_range=(-8, 8), y_range=(-4, 4),
+            plot_width=100, plot_height=100,
+            title='Bokeh serve only', tools='', toolbar_location=None)
+    p2.axis.visible = False
+    r1 = p2.rect(0, 0, width=18, height=10, fill_color='color',
+        line_color = 'black', source=source)
+
+    def rgb_to_hex(rgb):
+        return '#%02x%02x%02x' % rgb
+
     def callback(attr, old, new):
-        #color = slider._property_values['bar_color']
-        div.style['backgroundColor'] = 'rgb({:d},{:d},{:d})'.format(red.value[0], green.value[0], blue.value[0])
+        source.data['color'] = [rgb_to_hex((red.value[0], green.value[0], blue.value[0]))]
         return
 
     red.on_change('value', callback)
     green.on_change('value', callback)
     blue.on_change('value', callback)
 
-    return Column(children=[
-        Div(text="Only works with 'bokeh serve'"),
-        Row(children=[
-            WidgetBox(width=50, children=[red]),
-            WidgetBox(width=50, children=[green]),
-            WidgetBox(width=50, children=[blue]),
-            div,
-        ])
-    ])
+    return Row(children=[
+        red,
+        blue,
+        green,
+        p2,
+    ],
+               width=400
+               )
 test_slider = IonRangeSlider(slider_type='double', start=0, end=77, values=[1,2,3.123123,40.1234], prettify=round)
 
 sliders = Row(children=[
