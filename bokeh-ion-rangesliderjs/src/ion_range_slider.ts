@@ -156,7 +156,9 @@ export class IonRangeSliderView extends AbstractSliderView {
         opts.max  = end
         opts.step = step
         opts.from = value[0]
-        opts.to   = value[1]
+        if (this.model.slider_type == 'double') {
+          opts.to   = value[1]
+        }
       } else {
         // If values is given min, max and step are ignored.
         // So in turn, bokeh's start, end and step are ignored.
@@ -164,13 +166,17 @@ export class IonRangeSliderView extends AbstractSliderView {
         this.model.start = this.model.values[0]
         this.model.step = NaN
         this.model.end = this.model.values[this.model.values.length - 1]
-        // start and end are interpreted as the starting values
-        opts.from = opts.values.findIndex((val: string | number) => val == value[0])
+        if (this.model.slider_type == 'double') {
+          // start and end are interpreted as the starting values
+          opts.from = opts.values.findIndex((val: string | number) => val == value[0])
+          opts.to = opts.values.findIndex((val: string | number) => val == value[1])
+        } else {
+          opts.from = opts.values.findIndex((val: string | number | number[] | string[]) => val == value)
+        }
         if (opts.from == -1) {
           console.warn("Requested model.value[0] not found in 'values' array")
           opts.from = undefined
         }
-        opts.to = opts.values.findIndex((val: string | number) => val == value[1])
         if (opts.to == -1) {
           console.warn("Requested model.value[1] not found in 'values' array")
           opts.to = undefined
