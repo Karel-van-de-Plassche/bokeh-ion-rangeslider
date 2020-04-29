@@ -200,10 +200,9 @@ export class IonRangeSliderView extends AbstractSliderView {
 
       jQuery(this.input_el).ionRangeSlider(opts)
 
-      //TODO: Changing color of the bars
-      //$(this.el).find('.irs-bar').css('background', this.model.bar_color)
-      //$(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
-      //$(this.el).find('.irs-single').css('background', this.model.bar_color)
+      jQuery(this.el).find('.irs-bar').css('background', this.model.bar_color)
+      jQuery(this.el).find('.irs-bar-edge').css('background', this.model.bar_color)
+      jQuery(this.el).find('.irs-single').css('background', this.model.bar_color)
       for (var i = 0; i < this.group_el.children.length; i++) {
         var child = this.group_el.children[i] as HTMLElement
         var classes = child.classList
