@@ -174,7 +174,7 @@ export class IonRangeSliderView extends AbstractSliderView {
           opts.from = opts.values.findIndex((val: string | number) => val == value[0])
           opts.to = opts.values.findIndex((val: string | number) => val == value[1])
         } else {
-          opts.from = opts.values.findIndex((val: string | number | number[] | string[]) => val == value)
+          opts.from = opts.values.findIndex((val: string | number | number[] | string[]) => val == value[0])
         }
         if (opts.from == -1) {
           console.warn("Requested model.value[0] not found in 'values' array")
