@@ -5,7 +5,7 @@ import os
 from IPython import embed
 
 from bokeh.core.properties import Bool, Float, String, Enum, Tuple, Instance, Color, List, Any, Override, Either
-from bokeh.core.enums import SliderCallbackPolicy, enumeration
+from bokeh.core.enums import enumeration
 from bokeh.models.widgets import Div
 from bokeh.models.callbacks import Callback
 from bokeh.util.compiler import TypeScript

@@ -31,10 +31,10 @@ export class IonRangeSliderView extends AbstractSliderView {
     // Workaround to call the grandparent connect_signals
     ControlView.prototype.connect_signals.call(this)
 
-    const {callback, callback_policy, callback_throttle} = this.model.properties
-    this.on_change([callback, callback_policy, callback_throttle], () => this._init_callback())
+    const {direction, orientation, tooltips} = this.model.properties
+    this.on_change([direction, orientation, tooltips], () => this.render())
 
-    // TODO: Implement signals for ionRangeSlider
+    // TODO: implement connected signals
     //const {start, end, value, step, title} = this.model.properties
     //this.on_change([start, end, value, step], () => {
     //  const {start, end, value, step} = this._calc_to()
@@ -50,8 +50,9 @@ export class IonRangeSliderView extends AbstractSliderView {
       this._set_bar_color()
     })
 
-    // TODO: Implement tital update for ionRangeSlider
-    //this.on_change([value, title], () => this._update_title())
+    // TODO: Implement title update for ionRangeSlider
+    // const {show_value} = this.model.properties
+    // this.on_change([value, title, show_value], () => this._update_title())
   }
 
   _update_title(): void {
@@ -126,6 +127,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     const {start, end, value, step} = this._calc_to()
 
     // XXX: tooltips not implemented/applicable
+    //let tooltips: boolean | any[] // XXX
     //if (this.model.tooltips) {
     //  const formatter = {
     //    to: (value: number): string => this.model.pretty(value),
@@ -134,6 +136,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     //  tooltips = repeat(formatter, value.length)
     //} else
     //  tooltips = false
+
     if (this.slider_el == null) {
       // Slider does not exists, initialize
       this.input_el = input({type: "text"}) as any
@@ -217,21 +220,11 @@ export class IonRangeSliderView extends AbstractSliderView {
 
   protected _slide(data: any): void {
     this.model.value = this._calc_from_ion(data)
-    if (this.callback_wrapper != null)
-      this.callback_wrapper()
   }
 
   protected _change(data: any): void {
     this.model.value = this._calc_from_ion(data)
     this.model.value_throttled = this.model.value
-    switch (this.model.callback_policy) {
-      case 'mouseup':
-      case 'throttle': {
-        if (this.model.callback != null)
-          this.model.callback.execute(this.model)
-        break
-      }
-    }
   }
   protected _prettify(data: any): void {
     if (this.model)
@@ -294,7 +287,6 @@ export class IonRangeSlider extends AbstractSlider {
       step: 0.1,
       show_value: false,
       title: '',
-      callback_policy: 'continuous'
     })
   }
 }
