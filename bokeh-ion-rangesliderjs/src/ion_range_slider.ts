@@ -88,7 +88,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     if (this.model.values == null) {
       if (data.to == null) {
         // single slider
-        return data.from
+        return [data.from]
       } else {
         // range slider
         return [data.from, data.to]
@@ -96,7 +96,7 @@ export class IonRangeSliderView extends AbstractSliderView {
     } else {
       if (data.to_value == null) {
         // single slider
-        return data.from_value
+        return [data.from_value]
       } else {
         // range slider
         return [data.from_value, data.to_value]
