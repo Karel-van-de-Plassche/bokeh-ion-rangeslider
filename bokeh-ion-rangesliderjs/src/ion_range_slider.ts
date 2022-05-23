@@ -169,7 +169,7 @@ export class IonRangeSliderView extends AbstractSliderView {
         // So in turn, bokeh's start, end and step are ignored.
         opts.values = this.model.values
         this.model.start = this.model.values[0]
-        this.model.step = NaN
+        this.model.step = -1
         this.model.end = this.model.values[this.model.values.length - 1]
         if (this.model.slider_type == 'double') {
           // start and end are interpreted as the starting values
