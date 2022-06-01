@@ -7,7 +7,9 @@ import {div, input} from "core/dom"
 // We will subclass in JavaScript from the same class that was subclassed
 // from in Python
 import {AbstractSlider, AbstractSliderView, SliderSpec} from "models/widgets/abstract_slider"
+import {TickFormatter} from "models/formatters/tick_formatter"
 import {ControlView} from "models/widgets/control"
+import {isString} from "core/util/types"
 
 declare function jQuery(...args: any[]): any
 
@@ -167,7 +169,7 @@ export class IonRangeSliderView extends AbstractSliderView {
         // So in turn, bokeh's start, end and step are ignored.
         opts.values = this.model.values
         this.model.start = this.model.values[0]
-        this.model.step = NaN
+        this.model.step = -1
         this.model.end = this.model.values[this.model.values.length - 1]
         if (this.model.slider_type == 'double') {
           // start and end are interpreted as the starting values
@@ -278,7 +280,7 @@ export class IonRangeSlider extends AbstractSlider {
       prefix:            [ p.String,      ""           ],
     })
 
-    this.override({
+    this.override<IonRangeSlider.Props>({
       bar_color: '#ed5565',
       start: 0,
       end: 1,
@@ -287,6 +289,17 @@ export class IonRangeSlider extends AbstractSlider {
       show_value: false,
       title: '',
     })
+  }
+
+  protected _formatter(value: number | string, format: string | TickFormatter): string {
+    if (isString(value))
+      return value
+    else
+      if (isString(format)) {
+        console.error('String formatter not implemented by ionRangeSlider!')
+        return value.toString()
+      } else
+        return format.compute(value)
   }
 }
 IonRangeSlider.initClass()
